@@ -129,8 +129,28 @@ phy_tx::transmit(const char *buf, const int len)
     }
     
     // apply gain if necessary
-    if ( (gain() > 1.0+EPSILON) || (gain() < 1-EPSILON) )
-      (*txwaveform) = (*txwaveform) * gr_complexd(gain()/std::sqrt(float(ntx() ) ),0);
+   // if ( (gain() > 1.0+EPSILON) || (gain() < 1-EPSILON) )
+  //    (*txwaveform) = (*txwaveform) * gr_complexd(gain()/std::sqrt(float(ntx() ) ),0);
+    //modified by SHI
+    //normalize the waveform to -1 and 1
+    int nRows, nCols, ii, jj;
+    int maxNum = 0;
+    nRows = txwaveform->rows();
+    nCols = txwaveform->cols();
+    for(ii = 0; ii < nRows; ii++)
+    	for(jj = 0; jj < nCols; jj++)
+    	{
+    		if((*txwaveform)(ii,jj).real() > maxNum)
+    			maxNum = (*txwaveform)(ii,jj).real();
+    		if((*txwaveform)(ii,jj).imag()> maxNum)
+    			maxNum = (*txwaveform)(ii,jj).imag();
+    	}
+    (*txwaveform) = (*txwaveform) / maxNum;
+
+
+
+    //end
+
     
 #if CHECK_WAVEFORM_NTX
     // make sure returned txwaveform conforms with ntx()
